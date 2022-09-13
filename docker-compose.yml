@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  yndx_back:
+    build:
+      context: /
+      dockerfile: Dockerfile
+    container_name: files_info
+    ports:
+    - 80:80
+    command: python main.py
+
+  db:
+    restart: always
+    container_name: postgres
+    image: postgres:latest
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    env_file: .env
