@@ -1,14 +1,14 @@
 build:
-	docker-compose build yndx_back
+	docker-compose build
 
 run:
-	docker-compose up yndx_back
+	docker-compose up
 
 app_down:
-	docker-compose down yndx_back
+	docker-compose down
 
-migrate:
-	migrate -path ./services/files_info/internal/repository/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:49155/postgres?sslmode=disable' up
+db_up:
+	python migrations/db_up.py
 
 db_down:
-	migrate -path ./services/files_info/internal/repository/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:49155/postgres?sslmode=disable' down
+	python migrations/db_down.py

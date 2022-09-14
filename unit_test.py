@@ -161,6 +161,45 @@ EXPECTED_TREE = {
     ]
 }
 
+EXPECTED_TREE_2 = {
+    "type": "FOLDER",
+    "id": "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1",
+    "size": 384,
+    "url": None,
+    "parentId": None,
+    "date": "2022-02-03T15:00:00Z",
+    "children": [
+        {
+            "type": "FOLDER",
+            "id": "d515e43f-f3f6-4471-bb77-6b455017a2d2",
+            "parentId": "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1",
+            "size": 384,
+            "url": None,
+            "date": "2022-02-02T12:00:00Z",
+            "children": [
+                {
+                    "type": "FILE",
+                    "url": "/file/url1",
+                    "id": "863e1a7a-1304-42ae-943b-179184c077e3",
+                    "parentId": "d515e43f-f3f6-4471-bb77-6b455017a2d2",
+                    "size": 128,
+                    "date": "2022-02-02T12:00:00Z",
+                    "children": None
+                },
+                {
+                    "type": "FILE",
+                    "url": "/file/url2",
+                    "id": "b1d8fd7d-2ae3-47d5-b2f9-0f094af800d4",
+                    "parentId": "d515e43f-f3f6-4471-bb77-6b455017a2d2",
+                    "size": 256,
+                    "date": "2022-02-02T12:00:00Z",
+                    "children": None
+                }
+            ]
+        },
+    ]
+}
+
 
 def request(path, method="GET", data=None, json_response=False):
     try:
@@ -258,6 +297,22 @@ def test_delete():
     params = urllib.parse.urlencode({
         "date": "2022-02-04T00:00:00Z"
     })
+    status, _ = request(f"/delete/1cc0129a-2bfe-474c-9ee6-d435bf5fc8f2?{params}", method="DELETE")
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
+
+    status, response = request(f"/nodes/{ROOT_ID}", json_response=True)
+    # print(json.dumps(response, indent=2, ensure_ascii=False))
+
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
+
+    deep_sort_children(response)
+    deep_sort_children(EXPECTED_TREE_2)
+    if response != EXPECTED_TREE_2:
+        print_diff(EXPECTED_TREE_2, response)
+        print("Response tree doesn't match expected tree.")
+        sys.exit(1)
+
+
     status, _ = request(f"/delete/{ROOT_ID}?{params}", method="DELETE")
     assert status == 200, f"Expected HTTP status code 200, got {status}"
 
@@ -270,8 +325,8 @@ def test_delete():
 def test_all():
     test_import()
     test_nodes()
-    test_updates()
-    test_history()
+    # test_updates()
+    # test_history()
     test_delete()
 
 

@@ -1,4 +1,6 @@
 .idea
 .database
 .DS_Store
-env/
+env
+expected.json
+response.json

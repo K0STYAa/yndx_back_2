@@ -12,6 +12,7 @@ def get_db_connection():
     conn = psycopg2.connect(
         host=os.getenv('POSTGRES_HOST'),
         database=os.getenv('POSTGRES_DB'),
+        port=os.getenv('POSTGRES_PORT'),
         user=os.getenv('POSTGRES_USERNAME'),
         password=os.getenv('POSTGRES_PASSWORD'))
 
@@ -31,7 +32,7 @@ def imports():
         for item in content["items"]:
             item_type = item["type"]
             try:
-                item_url = item["url"]
+                item_url = "'" + str(item["url"]) + "'"
             except:
                 item_url = "NULL"
             item_id = item["id"]
@@ -48,10 +49,10 @@ def imports():
             except:
                 item_parentId = "NULL"
                 
-            print(item_type, item_url, item_id, item_size, item_parentId, item_date)
+            # print(item_type, item_url, item_id, item_size, item_parentId, item_date)
 
             query = ("INSERT INTO files (type, url, id, size, parentId, date) \
-                    VALUES ('%s', '%s', '%s', %s, %s, '%s')" % \
+                    VALUES ('%s', %s, '%s', %s, %s, '%s')" % \
                     (item_type,
                     item_url,
                     item_id,
@@ -128,7 +129,7 @@ def info(id):
         cur.execute(query)
         items = cur.fetchall()
         if items == []:
-            return None, 0, 0
+            return None, 0
         else:
             item = items[0]
             item_type = item[0]
@@ -148,7 +149,7 @@ def info(id):
                     else:
                         item_size = children_size
 
-            if item_type == "OFFER":
+            if item_type == "FILE":
                 if not len(childrens_list):
                     childrens_list = None
             
@@ -160,7 +161,7 @@ def info(id):
                 "id": item_id,
                 "size": item_size,
                 "parentId": item_parentId,
-                "date": item_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                "date": item_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "children": childrens_list
             }
         cur.close()
@@ -223,7 +224,5 @@ def delete_category(id, cur):
 
 
 
-
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0')
