@@ -12,3 +12,6 @@ db_up:
 
 db_down:
 	python migrations/db_down.py
+
+test:
+	python unit_test.py

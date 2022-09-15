@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, Response
 import psycopg2
+from datetime import datetime, timedelta
+
 
 app = Flask(__name__)
 
@@ -172,9 +174,49 @@ def info(id):
         return "Error", 0
 
 
+
+@app.route('/updates')
+def updates():
+
+    date_str = request.args.get('date')
+    date_to = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+    date_from = date_to - timedelta(days=1)
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    result = []
+
+    try:
+        query = ("SELECT id FROM files WHERE type = 'FILE' AND date >= '" + str(date_from) +"' AND date <= '" + str(date_to) + "'")
+        cur.execute(query)
+
+        items = cur.fetchall()
+        if len(items) > 0:
+            for item in items:
+                item_id = item[0]
+                item_info, _ = info(item_id)
+                result.append(item_info)
+
+    except:
+        return "Error", 404
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    data = {
+        "items": result,
+    }
+    return jsonify(data), 200
+
+
 @app.route('/delete/<id>', methods=["DELETE"])
 def delete(id=None):
     
+    date_str = request.args.get('date')
+    update_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -187,12 +229,14 @@ def delete(id=None):
             parentId = "'"+parId[0][0]+"'"
         delete_category(id, cur)
         if parentId:
-            # delete id from parent's children_list
+            # delete id from parent's children_list and update date of changes
+            print("/////")
             query = ("UPDATE files \
-                    SET children = array_remove(children, '%s') \
+                    SET date = '" + str(update_date) + "', children = array_remove(children, '%s') \
                     WHERE id = %s" % \
                     (id,
                     parentId))
+            print(query)
             cur.execute(query)
     except:
         return "Error", 404
@@ -221,7 +265,6 @@ def delete_category(id, cur):
     
     query = ("DELETE FROM files WHERE id = " + id)
     return cur.execute(query)
-
 
 
 if __name__ == '__main__':

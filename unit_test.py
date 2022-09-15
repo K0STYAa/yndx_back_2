@@ -9,6 +9,7 @@ import urllib.parse
 import urllib.request
 
 API_BASEURL = "http://localhost:80"
+# API_BASEURL = "http://localhost:5000"
 
 ROOT_ID = "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1"
 
@@ -167,7 +168,7 @@ EXPECTED_TREE_2 = {
     "size": 384,
     "url": None,
     "parentId": None,
-    "date": "2022-02-03T15:00:00Z",
+    "date": "2022-02-04T00:00:00Z",
     "children": [
         {
             "type": "FOLDER",
@@ -197,6 +198,38 @@ EXPECTED_TREE_2 = {
                 }
             ]
         },
+    ]
+}
+
+EXPECTED_TREE_3 = {
+    "items": [
+        {
+            "type": "FILE",
+            "url": "/file/url3",
+            "id": "98883e8f-0507-482f-bce2-2fb306cf6483",
+            "parentId": "1cc0129a-2bfe-474c-9ee6-d435bf5fc8f2",
+            "size": 512,
+            "date": "2022-02-03T12:00:00Z",
+            "children": None,
+        },
+        {
+            "type": "FILE",
+            "url": "/file/url4",
+            "id": "74b81fda-9cdc-4b63-8927-c978afed5cf4",
+            "parentId": "1cc0129a-2bfe-474c-9ee6-d435bf5fc8f2",
+            "size": 1024,
+            "date": "2022-02-03T12:00:00Z",
+            "children": None
+        },
+        {
+            "type": "FILE",
+            "url": "/file/url5",
+            "id": "73bc3b36-02d1-4245-ab35-3106c9ee1c65",
+            "parentId": "1cc0129a-2bfe-474c-9ee6-d435bf5fc8f2",
+            "size": 64,
+            "date": "2022-02-03T15:00:00Z",
+            "children": None
+        }
     ]
 }
 
@@ -279,6 +312,14 @@ def test_updates():
     })
     status, response = request(f"/updates?{params}", json_response=True)
     assert status == 200, f"Expected HTTP status code 200, got {status}"
+
+    deep_sort_children(response)
+    deep_sort_children(EXPECTED_TREE_3)
+    if response != EXPECTED_TREE_3:
+        print_diff(EXPECTED_TREE_3, response)
+        print("Response tree doesn't match expected tree.")
+        sys.exit(1)
+
     print("Test updates passed.")
 
 
@@ -325,7 +366,7 @@ def test_delete():
 def test_all():
     test_import()
     test_nodes()
-    # test_updates()
+    test_updates()
     # test_history()
     test_delete()
 
