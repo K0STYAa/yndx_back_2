@@ -1,4 +1,4 @@
-# REST API Avito balance system
+# REST API Yandex Disk System
 
 ## Разобранны следующие операции:
 - POST:      /imports                   - Импортирт элементов файловой системы
