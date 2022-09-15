@@ -53,15 +53,30 @@ def imports():
                 
             # print(item_type, item_url, item_id, item_size, item_parentId, item_date)
 
-            query = ("INSERT INTO files (type, url, id, size, parentId, date) \
-                    VALUES ('%s', %s, '%s', %s, %s, '%s')" % \
-                    (item_type,
-                    item_url,
-                    item_id,
-                    item_size,
-                    item_parentId,
-                    item_date))
+            query = ("SELECT * FROM files WHERE id = '" + str(item_id) + "'")
             cur.execute(query)
+            items = cur.fetchall()
+            if len(items) > 0: # update item
+                query = ("UPDATE files (url, size, parentId, date) \
+                        SET url = %s,  size = %s,  parentId = %s,  date = '%s'\
+                        WHERE id = '%s'" % \
+                        (item_url,
+                        item_id,
+                        item_size,
+                        item_parentId,
+                        item_date))
+                cur.execute(query)    
+            else:  # new item
+                query = ("INSERT INTO files (type, url, id, size, parentId, date) \
+                        VALUES ('%s', %s, '%s', %s, %s, '%s')" % \
+                        (item_type,
+                        item_url,
+                        item_id,
+                        item_size,
+                        item_parentId,
+                        item_date))
+                cur.execute(query)
+
             query = ("UPDATE files \
                     SET children = array_append(children, '%s') \
                     WHERE id = %s" % \
@@ -70,6 +85,7 @@ def imports():
             cur.execute(query)
             if item_parentId != "NULL":
                 update_parents_date(item_parentId, item_date, cur)
+
         conn.commit()
         cur.close()
         conn.close()
