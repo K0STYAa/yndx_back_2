@@ -8,10 +8,10 @@ app_down:
 	docker-compose down
 
 db_up:
-	python migrations/db_up.py
+	python3 migrations/db_up.py
 
 db_down:
-	python migrations/db_down.py
+	python3 migrations/db_down.py
 
 test:
-	python unit_test.py
+	python3 unit_test.py
